@@ -3,9 +3,10 @@ import { getDoc, getDocsWhere, setDoc, updateDoc } from "@/lib/firebase";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect } from "expo-router";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useRef } from "react";
 import {
   Alert,
+  Animated,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -22,12 +23,19 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(false);
   const [currentRoom, setCurrentRoom] = useState<any>(null);
   const [checkingRoom, setCheckingRoom] = useState(true);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   // Check if user is already in an active room - run every time screen is focused
   useFocusEffect(
     useCallback(() => {
       checkUserActiveRoom();
-    }, [user])
+      // Animate features card
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }).start();
+    }, [user, fadeAnim])
   );
 
   const checkUserActiveRoom = async () => {
@@ -228,26 +236,46 @@ export default function HomeScreen() {
 
   const getGreeting = () => {
     const hour = new Date().getHours();
+    if (hour < 6) return "Good Night";
     if (hour < 12) return "Good Morning";
     if (hour < 17) return "Good Afternoon";
-    return "Good Evening";
+    if (hour < 21) return "Good Evening";
+    return "Good Night";
+  };
+
+  const getGreetingIcon = () => {
+    const hour = new Date().getHours();
+    if (hour < 6) return "moon";
+    if (hour < 12) return "sunny";
+    if (hour < 17) return "partly-sunny";
+    if (hour < 21) return "cloudy";
+    return "moon";
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#6366f1" />
 
-      {/* Modern Header with Gradient */}
+      {/* Ultra Modern Header with Advanced Design */}
       <LinearGradient
         colors={["#6366f1", "#8b5cf6", "#a855f7"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.header}
       >
+        {/* Background decorations */}
+        <View style={styles.headerDecoration} />
+        <View style={styles.headerWave} />
+        <View style={styles.headerPattern} />
+
         <View style={styles.headerContent}>
           <View style={styles.greetingContainer}>
-            <Text style={styles.greeting}>{getGreeting()}</Text>
+            <View style={styles.greetingBadge}>
+              <Ionicons name={getGreetingIcon()} size={16} color="#fbbf24" />
+              <Text style={styles.greeting}>{getGreeting()}</Text>
+            </View>
             <Text style={styles.username}>{user?.username || "User"}! 👋</Text>
+            <Text style={styles.subtitle}>Ready for your next adventure?</Text>
           </View>
 
           <TouchableOpacity
@@ -255,7 +283,10 @@ export default function HomeScreen() {
             onPress={handleProfilePress}
             activeOpacity={0.7}
           >
-            <Ionicons name="person-circle" size={28} color="white" />
+            <View style={styles.profileButtonInner}>
+              <Ionicons name="person" size={20} color="white" />
+            </View>
+            <View style={styles.notificationDot} />
           </TouchableOpacity>
         </View>
       </LinearGradient>
@@ -264,6 +295,8 @@ export default function HomeScreen() {
         style={styles.content}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        bounces={true}
+        scrollEventThrottle={16}
       >
         {checkingRoom ? (
           /* Loading State */
@@ -440,12 +473,27 @@ export default function HomeScreen() {
         )}
 
         {/* Modern Features Info */}
-        <View style={styles.featuresCard}>
+        <Animated.View
+          style={[
+            styles.featuresCard,
+            {
+              opacity: fadeAnim,
+              transform: [
+                {
+                  translateY: fadeAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [30, 0],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
           <Text style={styles.featuresTitle}>How It Works</Text>
 
           <View style={styles.featureItem}>
             <View style={styles.featureIcon}>
-              <Ionicons name="people" size={20} color="#6366f1" />
+              <Ionicons name="add-circle" size={20} color="#6366f1" />
             </View>
             <View style={styles.featureContent}>
               <Text style={styles.featureTitle}>Create or Join Room</Text>
@@ -457,7 +505,7 @@ export default function HomeScreen() {
 
           <View style={styles.featureItem}>
             <View style={styles.featureIcon}>
-              <Ionicons name="location" size={20} color="#10b981" />
+              <Ionicons name="navigate" size={20} color="#10b981" />
             </View>
             <View style={styles.featureContent}>
               <Text style={styles.featureTitle}>Share Your Location</Text>
@@ -469,7 +517,7 @@ export default function HomeScreen() {
 
           <View style={styles.featureItem}>
             <View style={styles.featureIcon}>
-              <Ionicons name="map" size={20} color="#f59e0b" />
+              <Ionicons name="flag" size={20} color="#f59e0b" />
             </View>
             <View style={styles.featureContent}>
               <Text style={styles.featureTitle}>Set Destination</Text>
@@ -479,9 +527,14 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          <View style={styles.featureItem}>
+          <View
+            style={[
+              styles.featureItem,
+              { borderBottomWidth: 0, marginBottom: 0 },
+            ]}
+          >
             <View style={styles.featureIcon}>
-              <Ionicons name="time" size={20} color="#ef4444" />
+              <Ionicons name="speedometer" size={20} color="#ef4444" />
             </View>
             <View style={styles.featureContent}>
               <Text style={styles.featureTitle}>Track ETA</Text>
@@ -490,7 +543,7 @@ export default function HomeScreen() {
               </Text>
             </View>
           </View>
-        </View>
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -502,53 +555,134 @@ const styles = StyleSheet.create({
     backgroundColor: "#f1f5f9",
   },
   header: {
-    paddingTop: 20,
-    paddingBottom: 24,
-    paddingHorizontal: 20,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    paddingTop: 24,
+    paddingBottom: 32,
+    paddingHorizontal: 24,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
     shadowColor: "#6366f1",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    elevation: 12,
+    position: "relative",
+    overflow: "hidden",
+  },
+  headerDecoration: {
+    position: "absolute",
+    top: -100,
+    right: -100,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+  },
+  headerWave: {
+    position: "absolute",
+    bottom: -20,
+    left: -50,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+  },
+  headerPattern: {
+    position: "absolute",
+    top: 10,
+    left: -30,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "rgba(255, 255, 255, 0.03)",
   },
   headerContent: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
+    zIndex: 1,
   },
   greetingContainer: {
     flex: 1,
+    paddingRight: 16,
+  },
+  greetingBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginBottom: 8,
+    alignSelf: "flex-start",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
   greeting: {
-    fontSize: 16,
-    color: "rgba(255, 255, 255, 0.9)",
-    marginBottom: 4,
-    fontWeight: "500",
-  },
-  username: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "white",
+    fontSize: 13,
+    color: "rgba(255, 255, 255, 0.95)",
+    marginLeft: 6,
+    fontWeight: "600",
     letterSpacing: 0.5,
   },
+  username: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "white",
+    letterSpacing: 0.5,
+    marginBottom: 4,
+    textShadowColor: "rgba(0, 0, 0, 0.2)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.8)",
+    fontWeight: "500",
+    letterSpacing: 0.3,
+    lineHeight: 20,
+  },
   profileButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: "rgba(255, 255, 255, 0.15)",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderColor: "rgba(255, 255, 255, 0.25)",
+    shadowColor: "rgba(0, 0, 0, 0.3)",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 8,
+    elevation: 8,
+    position: "relative",
+  },
+  profileButtonInner: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  notificationDot: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#ef4444",
+    borderWidth: 2,
+    borderColor: "white",
   },
   content: {
     flex: 1,
   },
   scrollContent: {
     padding: 20,
-    paddingBottom: 100,
+    paddingBottom: 40,
+    flexGrow: 1,
   },
   card: {
     backgroundColor: "white",
@@ -684,53 +818,62 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 24,
     padding: 24,
-    marginBottom: 20,
+    marginBottom: 32,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 24,
     elevation: 8,
     borderWidth: 1,
     borderColor: "rgba(229, 231, 235, 0.5)",
   },
   featuresTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "700",
     color: "#1f2937",
-    marginBottom: 20,
+    marginBottom: 24,
     letterSpacing: 0.3,
+    textAlign: "center",
   },
   featureItem: {
     flexDirection: "row",
     alignItems: "flex-start",
     marginBottom: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9",
   },
   featureIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     backgroundColor: "#f0f4ff",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 16,
     borderWidth: 2,
     borderColor: "#e0e7ff",
+    shadowColor: "#6366f1",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   featureContent: {
     flex: 1,
-    paddingTop: 2,
+    paddingTop: 4,
   },
   featureTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "600",
     color: "#1f2937",
-    marginBottom: 6,
+    marginBottom: 8,
     letterSpacing: 0.2,
   },
   featureDescription: {
     fontSize: 14,
     color: "#6b7280",
-    lineHeight: 20,
+    lineHeight: 22,
   },
   loadingContainer: {
     alignItems: "center",
