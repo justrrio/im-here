@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "745250182948",
+    "project_id": "im-here-148fe",
+    "storage_bucket": "im-here-148fe.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:745250182948:android:2734eedf3b8826b77a05b1",
+        "android_client_info": {
+          "package_name": "com.justrrio.imhere"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCZHlYtJQtRaNRcFkTf6uwpPfI31tlweeA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

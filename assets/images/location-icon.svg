@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient circle -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#8b5cf6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="512" cy="512" r="480" fill="url(#bgGradient)" />
+  
+  <!-- Location pin icon -->
+  <path d="M512 192c-106.039 0-192 85.961-192 192 0 106.039 85.961 192 192 192s192-85.961 192-192c0-106.039-85.961-192-192-192zM512 320c35.346 0 64 28.654 64 64s-28.654 64-64 64-64-28.654-64-64 28.654-64 64-64z" fill="white" />
+  <path d="M512 144c-132.548 0-240 107.452-240 240 0 132.548 240 496 240 496s240-363.452 240-496c0-132.548-107.452-240-240-240zM512 480c-53.019 0-96-42.981-96-96s42.981-96 96-96 96 42.981 96 96-42.981 96-96 96z" fill="white" />
+</svg>
